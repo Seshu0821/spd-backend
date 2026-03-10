@@ -114,8 +114,7 @@ def predict(data: PredictionInput):
     important_features = [
         "reading_score",
         "writing_score",
-        "test_preparation_course",
-        "parental_level_of_education"
+        "test_preparation_course"
     ]
 
     filtered_contributions = {
@@ -129,3 +128,4 @@ def predict(data: PredictionInput):
         "performance_level": performance,
         "feature_contributions": filtered_contributions
     }
+
