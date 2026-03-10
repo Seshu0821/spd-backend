@@ -13,7 +13,7 @@ class PredictionInput(BaseModel):
     race_ethnicity: str
     parental_level_of_education: str
     lunch: str
-    test_preparation_course: str
+    test_preparation_course: int   # 0 = none, 1 = completed
     reading_score: int
     writing_score: int
 
@@ -44,6 +44,12 @@ def load_model():
     global model, preprocessor, explainer, feature_names
 
     df = pd.read_csv("data/stud.csv")
+
+    # Convert test_preparation_course to binary
+    df["test_preparation_course"] = df["test_preparation_course"].map({
+        "none": 0,
+        "completed": 1
+    })
 
     X = df.drop(columns=["math_score"])
     y = df["math_score"]
@@ -76,7 +82,10 @@ def load_model():
 @app.post("/predict")
 def predict(data: PredictionInput):
 
-    input_df = pd.DataFrame([data.model_dump()])
+    input_data = data.model_dump()
+
+    # create dataframe
+    input_df = pd.DataFrame([input_data])
 
     input_processed = preprocessor.transform(input_df)
 
@@ -99,7 +108,7 @@ def predict(data: PredictionInput):
     else:
         performance = "Excellent"
 
-    # SHAP explanation
+    # SHAP Explanation
     shap_values = explainer(input_processed)
 
     contributions = {}
@@ -108,7 +117,7 @@ def predict(data: PredictionInput):
         clean_name = name.split("__")[-1]
         contributions[clean_name] = float(val)
 
-    # Clean output for UI
+    # Filter only important features
     filtered_contributions = {}
 
     for key, value in contributions.items():
@@ -119,10 +128,8 @@ def predict(data: PredictionInput):
         elif "writing_score" in key:
             filtered_contributions["writing_score"] = value
 
-        elif "test_preparation_course_" in key:
-            if data.test_preparation_course in key:
-                filtered_contributions["test_preparation_course"] = value
-
+        elif "test_preparation_course" in key:
+            filtered_contributions["test_preparation_course"] = value
 
     return {
         "predicted_math_score": round(score, 2),
