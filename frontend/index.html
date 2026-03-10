@@ -1,0 +1,358 @@
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>AI Student Performance Predictor</title>
+
+        <style>
+            body {
+                margin: 0;
+                font-family:
+                    Segoe UI,
+                    Arial;
+                background: linear-gradient(135deg, #0f172a, #1e293b);
+                color: white;
+                display: flex;
+                justify-content: center;
+                padding: 30px;
+            }
+
+            .container {
+                max-width: 1000px;
+                width: 100%;
+            }
+
+            h1 {
+                text-align: center;
+                margin-bottom: 5px;
+            }
+
+            .subtitle {
+                text-align: center;
+                opacity: 0.8;
+                margin-bottom: 25px;
+            }
+
+            .card {
+                background: #1e293b;
+                padding: 25px;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                margin-bottom: 20px;
+            }
+
+            .form-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .input-box {
+                flex: 1 1 220px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            label {
+                font-size: 13px;
+                margin-bottom: 5px;
+            }
+
+            input,
+            select {
+                padding: 10px;
+                border-radius: 6px;
+                border: none;
+                background: #0f172a;
+                color: white;
+            }
+
+            button {
+                width: 100%;
+                padding: 12px;
+                margin-top: 20px;
+                border: none;
+                border-radius: 8px;
+                background: #3b82f6;
+                color: white;
+                font-size: 16px;
+                cursor: pointer;
+            }
+
+            button:hover {
+                background: #2563eb;
+            }
+
+            .error {
+                color: #f87171;
+                margin-top: 10px;
+                font-size: 14px;
+            }
+
+            .loader {
+                display: none;
+                text-align: center;
+                margin-top: 20px;
+            }
+
+            .loader div {
+                width: 35px;
+                height: 35px;
+                border: 4px solid #ccc;
+                border-top: 4px solid #3b82f6;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: auto;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .result {
+                display: none;
+                text-align: center;
+            }
+
+            .score {
+                font-size: 45px;
+                font-weight: bold;
+            }
+
+            .badge {
+                display: inline-block;
+                padding: 6px 14px;
+                border-radius: 20px;
+                margin-top: 8px;
+            }
+
+            .pass {
+                background: #22c55e;
+            }
+            .fail {
+                background: #ef4444;
+            }
+
+            .performance {
+                margin-top: 10px;
+                font-weight: bold;
+            }
+
+            .factors {
+                margin-top: 25px;
+                text-align: left;
+            }
+
+            .factor {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 15px;
+            }
+
+            .bar {
+                height: 8px;
+                background: #334155;
+                border-radius: 10px;
+                margin-bottom: 15px;
+            }
+
+            .bar span {
+                display: block;
+                height: 100%;
+                border-radius: 10px;
+                transition: width 0.5s ease;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <h1>AI Student Performance Predictor</h1>
+            <p class="subtitle">Machine Learning + Explainable AI</p>
+
+            <div class="card">
+                <div class="form-row">
+                    <div class="input-box">
+                        <label>Gender</label>
+                        <select id="gender">
+                            <option value="female">Female</option>
+                            <option value="male">Male</option>
+                        </select>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Group</label>
+                        <select id="race">
+                            <option>group A</option>
+                            <option>group B</option>
+                            <option>group C</option>
+                            <option>group D</option>
+                            <option>group E</option>
+                        </select>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Parental Education</label>
+                        <select id="parent">
+                            <option>bachelor's degree</option>
+                            <option>associate's degree</option>
+                            <option>master's degree</option>
+                            <option>some college</option>
+                            <option>high school</option>
+                            <option>some high school</option>
+                        </select>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Lunch</label>
+                        <select id="lunch">
+                            <option>standard</option>
+                            <option>free/reduced</option>
+                        </select>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Test Preparation</label>
+                        <select id="prep">
+                            <option value="1">Completed</option>
+                            <option value="0">None</option>
+                        </select>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Reading Score (1-100)</label>
+                        <input type="number" id="reading" min="1" max="100" />
+                    </div>
+
+                    <div class="input-box">
+                        <label>Writing Score (1-100)</label>
+                        <input type="number" id="writing" min="1" max="100" />
+                    </div>
+                </div>
+
+                <button onclick="predict()">Predict Score</button>
+
+                <div id="error" class="error"></div>
+
+                <div class="loader" id="loader">
+                    <div></div>
+                </div>
+            </div>
+
+            <div class="card result" id="result">
+                <h2>Prediction Result</h2>
+
+                <div class="score" id="score"></div>
+
+                <div id="statusBadge" class="badge"></div>
+
+                <div class="performance" id="performance"></div>
+
+                <div class="factors">
+                    <h3>Feature Contributions</h3>
+                    <div id="features"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const API_URL = "https://fyp-bihk.onrender.com/predict";
+
+            async function predict() {
+                const reading = document.getElementById("reading").value;
+                const writing = document.getElementById("writing").value;
+                const error = document.getElementById("error");
+
+                error.innerText = "";
+
+                if (reading == "" || writing == "") {
+                    error.innerText = "Please enter both scores.";
+                    return;
+                }
+
+                if (reading < 1 || reading > 100 || writing < 1 || writing > 100) {
+                    error.innerText = "Scores must be between 1 and 100.";
+                    return;
+                }
+
+                document.getElementById("loader").style.display = "block";
+                document.getElementById("result").style.display = "none";
+
+                const payload = {
+                    gender: document.getElementById("gender").value,
+                    race_ethnicity: document.getElementById("race").value,
+                    parental_level_of_education: document.getElementById("parent").value,
+                    lunch: document.getElementById("lunch").value,
+                    test_preparation_course: parseInt(document.getElementById("prep").value),
+                    reading_score: parseInt(reading),
+                    writing_score: parseInt(writing),
+                };
+
+                try {
+                    const res = await fetch(API_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload),
+                    });
+
+                    const data = await res.json();
+
+                    document.getElementById("loader").style.display = "none";
+                    document.getElementById("result").style.display = "block";
+
+                    document.getElementById("score").innerText = data.predicted_math_score;
+
+                    const badge = document.getElementById("statusBadge");
+                    badge.innerText = data.status;
+                    badge.className = "badge " + (data.status === "Pass" ? "pass" : "fail");
+
+                    document.getElementById("performance").innerText = "Performance Level: " + data.performance_level;
+
+                    const featureDiv = document.getElementById("features");
+                    featureDiv.innerHTML = "";
+
+                    let entries = Object.entries(data.feature_contributions);
+
+                    let other = entries.find(([k]) => k === "other_factors");
+                    let rest = entries.filter(([k]) => k !== "other_factors");
+
+                    rest.sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+
+                    if (other) rest.push(other);
+
+                    const max = Math.max(...rest.map((e) => Math.abs(e[1])));
+
+                    rest.forEach(([key, value]) => {
+                        let name = key.replaceAll("_", " ");
+
+                        let factor = document.createElement("div");
+                        factor.className = "factor";
+                        factor.innerHTML = `<span>${name}</span><span>${value.toFixed(2)}</span>`;
+
+                        let bar = document.createElement("div");
+                        bar.className = "bar";
+
+                        let fill = document.createElement("span");
+
+                        fill.style.width = (Math.abs(value) / max) * 100 + "%";
+                        fill.style.background = value >= 0 ? "#22c55e" : "#ef4444";
+
+                        bar.appendChild(fill);
+
+                        featureDiv.appendChild(factor);
+                        featureDiv.appendChild(bar);
+                    });
+                } catch (err) {
+                    error.innerText = "API error. Please try again.";
+                }
+            }
+        </script>
+    </body>
+</html>
