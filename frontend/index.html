@@ -263,7 +263,6 @@
         </div>
 
         <script>
-            const API_URL = "https://fyp-bihk.onrender.com/predict";
 
             async function predict() {
                 const reading = document.getElementById("reading").value;
@@ -296,7 +295,7 @@
                 };
 
                 try {
-                    const res = await fetch(API_URL, {
+                    const res = await fetch("/api/predict", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(payload),
