@@ -90,7 +90,7 @@ def predict(data: PredictionInput):
     prediction = model.predict(input_processed)
 
     score = float(prediction[0])
-
+    score = max(0, min(100, score))
     # Pass / Fail
     status = "Pass" if score >= 40 else "Fail"
 
@@ -143,3 +143,4 @@ def predict(data: PredictionInput):
         "performance_level": performance,
         "feature_contributions": filtered_contributions
     }
+
